@@ -1,0 +1,37 @@
+sequenceDiagram
+    autonumber
+    participant EB as EventBridge (game-window trigger)
+    participant Poller as API-Sports Poller (Lambda/worker)
+    participant API as API-Sports NFL
+    participant DB as Postgres (Supabase)
+    participant Engine as Scoring Engine
+    participant SSE as SSE Endpoint
+    participant Client as Matchup UI (owner browser)
+    participant NV as nflverse (Tue final)
+
+    Note over EB,Poller: Sunday 1:00 PM ET — game window opens
+    EB->>Poller: invoke (every 15-60s during window)
+    Poller->>API: GET live stats + injuries
+    API-->>Poller: in-game stat lines (provisional)
+
+    Poller->>DB: upsert NFLWeeklyStat (is_final = false)
+    Poller->>DB: upsert NFLInjury (current = true)
+
+    Note over Engine: triggered per changed player
+    DB->>Engine: changed NFLWeeklyStat rows + season ScoringRule
+    Engine->>Engine: calculatePoints(stats, rules) per player
+    Engine->>DB: upsert FantasyScore (points + breakdown, provisional)
+    Engine->>DB: re-aggregate Matchup.home_score / away_score
+
+    DB->>SSE: score delta (MatchupUpdate event)
+    SSE-->>Client: push live update (last-event-id supported)
+    Client->>Client: re-render scores + stat breakdown (no refresh)
+
+    Note over Client: owner sees real stats + fantasy pts live
+
+    Note over EB,NV: Tuesday 6:00 AM ET — games complete
+    NV->>DB: weekly final stats (authoritative)
+    DB->>DB: overwrite NFLWeeklyStat (is_final = true)
+    DB->>Engine: recompute final FantasyScore
+    Engine->>DB: settle FantasyScore + Matchup (final)
+    Note over DB: provisional live scores -> settled
