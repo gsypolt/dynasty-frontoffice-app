@@ -1,0 +1,89 @@
+erDiagram
+    %% ===== Identity & League Config =====
+    User ||--o{ LeagueMember : "is"
+    User ||--o{ Team : "owns"
+    User ||--o{ DraftNotificationConfig : "configures"
+    User ||--o{ AdminAuditLog : "performs"
+
+    League ||--o{ Season : "has"
+    League ||--o{ LeagueMember : "has"
+    League ||--o{ Team : "has"
+    League ||--o{ Division : "has"
+    League ||--o| DraftDiscordConfig : "configures"
+
+    LeagueMember }o--|| Team : "manages"
+
+    Team ||--o{ TeamSeasonProfile : "snapshot"
+    Division ||--o{ TeamSeasonProfile : "groups"
+
+    %% ===== Seasons (Temporal Scope) =====
+    Season ||--o{ ScoringRule : "scopes"
+    Season ||--o{ RosterSlot : "scopes"
+    Season ||--o{ TeamSeasonProfile : "scopes"
+    Season ||--o{ WeeklyRoster : "scopes"
+    Season ||--o{ Matchup : "scopes"
+    Season ||--o{ FantasyScore : "scopes"
+    Season ||--o{ SeasonStanding : "scopes"
+    Season ||--o{ Draft : "scopes"
+    Season ||--o{ Trade : "scopes"
+    Season ||--o{ WaiverClaim : "scopes"
+    Season ||--o{ WaiverSchedule : "scopes"
+    Season ||--o{ WaiverWindow : "scopes"
+    Season ||--o{ Transaction : "scopes"
+    Season ||--o{ PlayoffSeeding : "scopes"
+    Season ||--o{ PlayoffStanding : "scopes"
+    Season ||--o| Championship : "crowns"
+
+    %% ===== NFL Data (External Truth) =====
+    NFLPlayer ||--o{ NFLWeeklyStat : "records"
+    NFLPlayer ||--o{ NFLInjury : "has"
+    NFLPlayer ||--o{ RosterEntry : "rostered"
+    NFLPlayer ||--o{ WeeklyRoster : "started/benched"
+    NFLPlayer ||--o{ FantasyScore : "scored"
+    NFLPlayer ||--o{ DraftPick : "drafted as"
+    NFLPlayer ||--o{ DraftWishlist : "targeted"
+    NFLGame ||--o{ WeeklyRoster : "locks"
+
+    %% ===== Fantasy State (League Truth) =====
+    Team ||--o{ RosterEntry : "holds"
+    Team ||--o{ WeeklyRoster : "sets"
+    Team ||--o{ SeasonStanding : "ranked"
+    Team ||--o{ Matchup : "home/away"
+
+    %% ===== Drafts & Picks =====
+    Draft ||--o{ DraftPick : "contains"
+    Draft ||--o{ DraftWishlist : "has"
+    Draft ||--o{ DraftNotificationLog : "emits"
+    Team ||--o{ DraftPick : "owns"
+    Team ||--o{ FutureDraftPick : "owns"
+    Team ||--o{ DraftWishlist : "builds"
+    DraftPick ||--o{ DraftNotificationLog : "triggers"
+
+    %% ===== Transactions (Event Log) =====
+    Trade ||--o{ TradeAsset : "moves"
+    Trade ||--o{ FutureDraftPick : "reassigns"
+    Team ||--o{ Trade : "proposes"
+    Team ||--o{ WaiverClaim : "submits"
+    Team ||--o{ Transaction : "logged"
+    WaiverSchedule ||--o{ WaiverWindow : "materializes"
+    WaiverWindow ||--o{ WaiverClaim : "processes"
+    Season ||--o| WaiverOrder : "orders"
+    WaiverOrder ||--o{ WaiverOrderEntry : "ranks"
+    Team ||--o{ WaiverOrderEntry : "positioned"
+    Trade ||--o{ Transaction : "records"
+    WaiverClaim ||--o{ Transaction : "records"
+
+    %% ===== Playoff & Historical Records =====
+    Team ||--o{ PlayoffSeeding : "seeded"
+    Team ||--o{ PlayoffStanding : "competes"
+    Team ||--o{ HeadToHeadRecord : "team_a"
+    Team ||--o{ LeagueRecord : "holds"
+    Team ||--o{ TeamCareerStats : "aggregates"
+    Division ||--o{ PlayoffSeeding : "qualifies"
+    League ||--o{ HeadToHeadRecord : "tracks"
+    League ||--o{ LeagueRecord : "tracks"
+    League ||--o{ TeamCareerStats : "tracks"
+
+    %% ===== Admin =====
+    League ||--o{ AdminAuditLog : "audits"
+    Season ||--o{ AdminAuditLog : "audits"
